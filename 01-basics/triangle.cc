@@ -25,11 +25,12 @@ double Triangle::square () const
     return abs(sq) / 2.0;
 }
 
-int main() {
-  struct Triangle t;
-  t.pts[0] = Point{1.0, 1.0};
-  t.pts[1] = Point{3.0, 3.0};
-  t.pts[2] = Point{1.0, 2.0};
-  double square = t.square();
-  std::cout << square << std::endl;
+int main ()
+{
+    struct Triangle t;
+    t.pts[0] = Point{1.0, 1.0};
+    t.pts[1] = Point{3.0, 3.0};
+    t.pts[2] = Point{1.0, 2.0};
+    double square = t.square();
+    std::cout << square << std::endl;
 }
