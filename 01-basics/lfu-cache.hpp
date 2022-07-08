@@ -3,6 +3,7 @@
 #include <list>
 #include <unordered_map>
 #include <iterator>
+#include <algorithm>
 
 namespace lfu 
 {
@@ -98,7 +99,7 @@ template <typename T, typename KeyT = int> struct lfu_t
 
         freq_node_t<T> parent_node = (*found).freq_node;
         parent_node.local_list.erase(found);
-        int cur_freq = parent_node.freq + 1;
+        size_t cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
         {
             clist_.remove(parent_node);
