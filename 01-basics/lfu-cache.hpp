@@ -12,6 +12,7 @@ template <typename T>struct freq_node_t;
 template <typename T> struct local_node_t
 {
     size_t freq;
+    int key;
     struct freq_node_t<T> freq_node;
     T data;
 
@@ -40,12 +41,12 @@ template <typename T>struct freq_node_t
 
 template <typename T, typename KeyT = int> struct lfu_t
 {
-    using local_list_it_t = typename std::list<struct local_node_t<T>>::iterator;
     using freq_list_it_t = typename std::list<struct freq_node_t<T>>::iterator;
     
     private:
     std::list<freq_node_t<T>> clist_;
 
+    using local_list_it_t = typename std::list<struct local_node_t<T>>::iterator;
     std::unordered_map <KeyT, local_list_it_t> table_;
     
     public:
@@ -71,8 +72,8 @@ template <typename T, typename KeyT = int> struct lfu_t
             if (full())
             {
                 freq_node_t last_freq = clist_.back();
-                local_list_t<T> last_local_list = last_freq.local_list;
-                table_.erase(last_local_list.back());
+                local_node_t<T> to_erase = last_freq.local_list.back();
+                table_.erase(table_.find(to_erase.key));
                 if (last_freq.local_list.size() == 0)
                 {
                     clist_.remove(last_freq);
@@ -93,9 +94,9 @@ template <typename T, typename KeyT = int> struct lfu_t
             first_freq.local_list.push_front(new_local_node);
             return false;
         }
-        local_node_t<T> found = *hit;
+        auto found = hit->second;
 
-        freq_node_t parent_node = found.freq_node;
+        freq_node_t<T> parent_node = (*found).freq_node;
         parent_node.local_list.erase(found);
         int cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
@@ -105,9 +106,9 @@ template <typename T, typename KeyT = int> struct lfu_t
 
         freq_list_it_t it = std::find (clist_.begin(), clist_.end(), parent_node);
         
-        std::next(it, 1);
+        it = std::next(it, 1);
 
-        freq_node_t next_freq = *it;
+        freq_node_t<T> next_freq = *it;
 
         if (next_freq.freq != cur_freq)
         {
