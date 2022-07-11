@@ -41,6 +41,11 @@ template <typename T>struct freq_node_t
 template <typename T>
 freq_node_t<T>::freq_node_t(size_t fr) : freq{fr} {}
 
+template <typename T>
+int operator==(freq_node_t<T> first, const freq_node_t<T> second)
+{
+    return first.freq == second.freq;
+}
 
 template <typename T, typename KeyT = int> struct lfu_t
 {
@@ -55,10 +60,7 @@ template <typename T, typename KeyT = int> struct lfu_t
     public:
     size_t sz_;
 
-    lfu_t (size_t sz)
-    {
-        sz_ = sz;
-    }
+    lfu_t (size_t sz) : sz_(sz) {}
 
     bool full ()
     {
@@ -99,7 +101,7 @@ template <typename T, typename KeyT = int> struct lfu_t
         }
         auto found = hit->second;
 
-        freq_node_t<T> parent_node = (*found).freq_node;
+        freq_node_t<T>& parent_node = (*found).freq_node;
         parent_node.local_list.erase(found);
         size_t cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
