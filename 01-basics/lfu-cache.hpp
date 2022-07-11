@@ -17,10 +17,7 @@ template <typename T> struct local_node_t
     struct freq_node_t<T> freq_node;
     T data;
 
-    local_node_t (size_t fr)
-    {
-        freq = fr;
-    }
+    local_node_t (size_t fr) : freq(fr) {}
 };
 
 // "using" operator with template down there
@@ -33,10 +30,7 @@ template <typename T>struct freq_node_t
 
     local_list_t<T> local_list;
 
-    freq_node_t(size_t fr)
-    {
-        freq = fr;
-    }
+    freq_node_t(size_t fr) : freq(fr) {}
 };
 
 
@@ -72,16 +66,16 @@ template <typename T, typename KeyT = int> struct lfu_t
         {
             if (full())
             {
-                freq_node_t last_freq = clist_.back();
+                freq_node_t<T> last_freq = clist_.back();
                 local_node_t<T> to_erase = last_freq.local_list.back();
                 table_.erase(table_.find(to_erase.key));
                 if (last_freq.local_list.size() == 0)
                 {
-                    clist_.remove(last_freq);
+                    clist_.erase(std::prev(clist_.end()));
                 }
             }
 
-            freq_node_t first_freq = clist_.front();
+            freq_node_t<T> first_freq = clist_.front();
             if (first_freq.freq != 1)
             {
                 freq_node_t<T> new_first_freq(1);
@@ -89,7 +83,7 @@ template <typename T, typename KeyT = int> struct lfu_t
                 first_freq = clist_.front();
             }
             
-            local_node_t<T> new_local_node(1);
+            local_node_t<T> new_local_node (1);
             new_local_node.data = slow_get_page(key);
             new_local_node.freq_node = first_freq;
             first_freq.local_list.push_front(new_local_node);
@@ -113,7 +107,7 @@ template <typename T, typename KeyT = int> struct lfu_t
 
         if (next_freq.freq != cur_freq)
         {
-            freq_node_t <T> new_freq(cur_freq);
+            freq_node_t<T> new_freq(cur_freq);
             clist_.insert(std::next(it, 1), new_freq);
             next_freq = new_freq;
         }
