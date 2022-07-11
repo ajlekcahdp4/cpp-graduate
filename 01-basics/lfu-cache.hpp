@@ -17,8 +17,12 @@ template <typename T> struct local_node_t
     struct freq_node_t<T> freq_node;
     T data;
 
-    local_node_t (size_t fr) : freq(fr) {}
+    local_node_t (size_t);
+    local_node_t () : freq(1) {}
 };
+
+template <typename T>
+local_node_t<T>::local_node_t(size_t fr) : freq{fr} {}
 
 // "using" operator with template down there
 template <typename T>
@@ -30,8 +34,12 @@ template <typename T>struct freq_node_t
 
     local_list_t<T> local_list;
 
-    freq_node_t(size_t fr) : freq(fr) {}
+    freq_node_t(size_t);
+    freq_node_t() : freq(1) {}
 };
+
+template <typename T>
+freq_node_t<T>::freq_node_t(size_t fr) : freq{fr} {}
 
 
 template <typename T, typename KeyT = int> struct lfu_t
@@ -67,7 +75,7 @@ template <typename T, typename KeyT = int> struct lfu_t
             if (full())
             {
                 freq_node_t<T> last_freq = clist_.back();
-                local_node_t<T> to_erase = last_freq.local_list.back();
+                local_node_t<T>& to_erase = last_freq.local_list.back();
                 table_.erase(table_.find(to_erase.key));
                 if (last_freq.local_list.size() == 0)
                 {
@@ -83,7 +91,7 @@ template <typename T, typename KeyT = int> struct lfu_t
                 first_freq = clist_.front();
             }
             
-            local_node_t<T> new_local_node (1);
+            local_node_t<T> new_local_node;
             new_local_node.data = slow_get_page(key);
             new_local_node.freq_node = first_freq;
             first_freq.local_list.push_front(new_local_node);
