@@ -24,6 +24,12 @@ template <typename T> struct local_node_t
 template <typename T>
 local_node_t<T>::local_node_t(size_t fr) : freq{fr} {}
 
+template <typename T>
+int operator==(local_node_t<T> first, const local_node_t<T> second)
+{
+    return first.freq == second.freq;
+}
+
 // "using" operator with template down there
 template <typename T>
 using local_list_t = std::list<struct local_node_t<T>>;
@@ -85,33 +91,32 @@ template <typename T, typename KeyT = int> struct lfu_t
                 }
             }
 
-            freq_node_t<T> first_freq = clist_.front();
-            if (first_freq.freq != 1)
+            freq_node_t<T> first_freq;
+            if (clist_.size() == 0 || (clist_.front()).freq != 1)
             {
-                freq_node_t<T> new_first_freq(1);
-                clist_.push_front(new_first_freq);
-                first_freq = clist_.front();
+                clist_.push_front(first_freq);
             }
             
             local_node_t<T> new_local_node;
             new_local_node.data = slow_get_page(key);
             new_local_node.freq_node = first_freq;
             first_freq.local_list.push_front(new_local_node);
+            table_[key] = first_freq.local_list.begin();
             return false;
         }
         auto found = hit->second;
 
         freq_node_t<T>& parent_node = (*found).freq_node;
-        parent_node.local_list.erase(found);
+        parent_node.local_list.remove(*found);
         size_t cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
         {
             clist_.remove(parent_node);
         }
 
-        freq_list_it_t it = std::find (clist_.begin(), clist_.end(), parent_node);
+        freq_list_it_t it = std::find (clist_.begin(), std::prev(clist_.end()), parent_node);
         
-        it = std::next(it, 1);
+        it = std::next(it);
 
         freq_node_t<T> next_freq = *it;
 

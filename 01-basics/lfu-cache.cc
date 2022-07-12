@@ -18,7 +18,7 @@ int main ()
 
     std::cin >> m >> n;
     assert (std::cin.good());
-    lfu::lfu_t<int> c{m};
+    lfu::lfu_t<int> c(m);
 
     for (int i = 0; i < n; i++)
     {
