@@ -26,7 +26,11 @@ template <typename T>
 local_node_t<T>::local_node_t(size_t fr) : freq{fr} {}
 
 template <typename T>
-local_node_t<T>::local_node_t(size_t fr, int key, freq_node_t<T>* freq_node) : freq{fr}, key(key), freq_node(freq_node) {}
+local_node_t<T>::local_node_t(size_t fr, int key, freq_node_t<T>* freq_node_ar) : freq{fr}, key(key)
+{
+    freq_node = new freq_node_t<T>(freq_node_ar->freq);
+    freq_node->local_list = freq_node_ar->local_list;
+}
 
 template <typename T>
 int operator==(local_node_t<T> first, const local_node_t<T> second)
@@ -95,15 +99,15 @@ template <typename T, typename KeyT = int> struct lfu_t
                 }
             }
 
-            freq_node_t<T> first_freq; // was alocated there, but after quiting this function it is a parrot no more
+            freq_node_t<T> first_freq;
             if (clist_.size() == 0 || (clist_.front()).freq != 1)
             {
                 clist_.push_front(first_freq);
             }
             
-            local_node_t<T> new_local_node (1, key, &first_freq);
-            new_local_node.data = slow_get_page(key);
-            new_local_node.freq_node->local_list.push_front(new_local_node);
+            local_node_t<T> *new_local_node = new local_node_t<T> (1, key, &first_freq);
+            new_local_node->data = slow_get_page(key);
+            new_local_node->freq_node->local_list.push_front(*new_local_node);
             table_[key] = first_freq.local_list.begin();
             return false;
         }
@@ -127,9 +131,9 @@ template <typename T, typename KeyT = int> struct lfu_t
             next_freq = new_freq;
         }
 
-        local_node_t<T> new_local_node(cur_freq, key, &next_freq);
-        new_local_node.data = slow_get_page(key);
-        next_freq.local_list.push_front(new_local_node);
+        local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, &next_freq);
+        new_local_node->data = slow_get_page(key);
+        next_freq.local_list.push_front(*new_local_node);
         return true;
     }
 };
