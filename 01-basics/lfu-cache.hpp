@@ -26,11 +26,7 @@ template <typename T>
 local_node_t<T>::local_node_t(size_t fr) : freq{fr} {}
 
 template <typename T>
-local_node_t<T>::local_node_t(size_t fr, int key, freq_node_t<T>* freq_node_ar) : freq{fr}, key(key)
-{
-    freq_node = new freq_node_t<T>(freq_node_ar->freq);
-    freq_node->local_list = freq_node_ar->local_list;
-}
+local_node_t<T>::local_node_t(size_t fr, int key, freq_node_t<T>* freq_node_ar) : freq{fr}, key(key), freq_node(freq_node_ar) {}
 
 template <typename T>
 int operator==(local_node_t<T> first, const local_node_t<T> second)
@@ -99,16 +95,16 @@ template <typename T, typename KeyT = int> struct lfu_t
                 }
             }
 
-            freq_node_t<T> first_freq;
+            freq_node_t<T> *first_freq = new freq_node_t<T>;
             if (clist_.size() == 0 || (clist_.front()).freq != 1)
             {
-                clist_.push_front(first_freq);
+                clist_.push_front(*first_freq);
             }
             
-            local_node_t<T> *new_local_node = new local_node_t<T> (1, key, &first_freq);
+            local_node_t<T> *new_local_node = new local_node_t<T> (1, key, first_freq); // not always this first
             new_local_node->data = slow_get_page(key);
             new_local_node->freq_node->local_list.push_front(*new_local_node);
-            table_[key] = first_freq.local_list.begin();
+            table_[key] = first_freq->local_list.begin();
             return false;
         }
         auto found = hit->second;
@@ -122,18 +118,17 @@ template <typename T, typename KeyT = int> struct lfu_t
         }
 
         freq_list_it_t it = std::find (clist_.begin(), std::prev(clist_.end()), parent_node);
-        freq_node_t<T>& next_freq = *(std::next(it));
+        freq_node_t<T>& next_freq = *(std::next(it)); // what if there are no next freq node?
 
+        freq_node_t<T> *new_freq = new freq_node_t<T>(cur_freq);
         if (next_freq.freq != cur_freq)
         {
-            freq_node_t<T> new_freq(cur_freq);
-            clist_.insert(std::next(it, 1), new_freq);
-            next_freq = new_freq;
+            clist_.insert(std::next(it, 1), *new_freq);
         }
 
-        local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, &next_freq);
+        local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, new_freq);
         new_local_node->data = slow_get_page(key);
-        next_freq.local_list.push_front(*new_local_node);
+        new_freq->local_list.push_front(*new_local_node);
         return true;
     }
 };
