@@ -14,15 +14,19 @@ template <typename T> struct local_node_t
 {
     size_t freq;
     int key;
-    struct freq_node_t<T> freq_node;
+    freq_node_t<T> *freq_node;
     T data;
 
     local_node_t (size_t);
+    local_node_t (size_t, int, freq_node_t<T>*);
     local_node_t () : freq(1) {}
 };
 
 template <typename T>
 local_node_t<T>::local_node_t(size_t fr) : freq{fr} {}
+
+template <typename T>
+local_node_t<T>::local_node_t(size_t fr, int key, freq_node_t<T>* freq_node) : freq{fr}, key(key), freq_node(freq_node) {}
 
 template <typename T>
 int operator==(local_node_t<T> first, const local_node_t<T> second)
@@ -55,7 +59,7 @@ int operator==(freq_node_t<T> first, const freq_node_t<T> second)
 
 template <typename T, typename KeyT = int> struct lfu_t
 {
-    using freq_list_it_t = typename std::list<struct freq_node_t<T>>::iterator;
+    using freq_list_it_t = typename std::list<freq_node_t<T>>::iterator;
     
     private:
     std::list<freq_node_t<T>> clist_;
@@ -82,7 +86,7 @@ template <typename T, typename KeyT = int> struct lfu_t
         {
             if (full())
             {
-                freq_node_t<T> last_freq = clist_.back();
+                freq_node_t<T>& last_freq = clist_.back();
                 local_node_t<T>& to_erase = last_freq.local_list.back();
                 table_.erase(table_.find(to_erase.key));
                 if (last_freq.local_list.size() == 0)
@@ -91,22 +95,21 @@ template <typename T, typename KeyT = int> struct lfu_t
                 }
             }
 
-            freq_node_t<T> first_freq;
+            freq_node_t<T> first_freq; // was alocated there, but after quiting this function it is a parrot no more
             if (clist_.size() == 0 || (clist_.front()).freq != 1)
             {
                 clist_.push_front(first_freq);
             }
             
-            local_node_t<T> new_local_node;
+            local_node_t<T> new_local_node (1, key, &first_freq);
             new_local_node.data = slow_get_page(key);
-            new_local_node.freq_node = first_freq;
-            first_freq.local_list.push_front(new_local_node);
+            new_local_node.freq_node->local_list.push_front(new_local_node);
             table_[key] = first_freq.local_list.begin();
             return false;
         }
         auto found = hit->second;
 
-        freq_node_t<T>& parent_node = (*found).freq_node;
+        freq_node_t<T>& parent_node = *(*found).freq_node;
         parent_node.local_list.remove(*found);
         size_t cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
@@ -115,10 +118,7 @@ template <typename T, typename KeyT = int> struct lfu_t
         }
 
         freq_list_it_t it = std::find (clist_.begin(), std::prev(clist_.end()), parent_node);
-        
-        it = std::next(it);
-
-        freq_node_t<T> next_freq = *it;
+        freq_node_t<T>& next_freq = *(std::next(it));
 
         if (next_freq.freq != cur_freq)
         {
@@ -127,9 +127,8 @@ template <typename T, typename KeyT = int> struct lfu_t
             next_freq = new_freq;
         }
 
-        local_node_t<T> new_local_node(cur_freq);
+        local_node_t<T> new_local_node(cur_freq, key, &next_freq);
         new_local_node.data = slow_get_page(key);
-        new_local_node.freq_node = next_freq;
         next_freq.local_list.push_front(new_local_node);
         return true;
     }
