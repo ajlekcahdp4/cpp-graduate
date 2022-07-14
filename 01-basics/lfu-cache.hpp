@@ -56,7 +56,7 @@ int operator==(freq_node_t<T> first, const freq_node_t<T> second)
 {
     return first.freq == second.freq;
 }
-
+//====================================lfu=========================================
 template <typename T, typename KeyT = int> struct lfu_t
 {
     using freq_list_it_t = typename std::list<freq_node_t<T>>::iterator;
@@ -106,7 +106,7 @@ template <typename T, typename KeyT = int> struct lfu_t
                 first_freq = &(clist_.front());
             }
             
-            local_node_t<T> *new_local_node = new local_node_t<T> (1, key, first_freq); // not always this first
+            local_node_t<T> *new_local_node = new local_node_t<T> (1, key, first_freq);
             new_local_node->data = slow_get_page(key);
             new_local_node->freq_node->local_list.push_front(*new_local_node);
             table_[key] = first_freq->local_list.begin();
