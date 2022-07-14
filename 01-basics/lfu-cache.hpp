@@ -86,7 +86,7 @@ template <typename T, typename KeyT = int> struct lfu_t
         {
             if (full())
             {
-                freq_node_t<T>& last_freq = clist_.back();
+                freq_node_t<T>& last_freq = clist_.front();
                 local_node_t<T>& to_erase = last_freq.local_list.back();
                 table_.erase(table_.find(to_erase.key));
                 if (last_freq.local_list.size() == 0)
@@ -99,6 +99,11 @@ template <typename T, typename KeyT = int> struct lfu_t
             if (clist_.size() == 0 || (clist_.front()).freq != 1)
             {
                 clist_.push_front(*first_freq);
+            }
+            else
+            {
+                delete first_freq;
+                first_freq = &(clist_.front());
             }
             
             local_node_t<T> *new_local_node = new local_node_t<T> (1, key, first_freq); // not always this first
@@ -123,7 +128,12 @@ template <typename T, typename KeyT = int> struct lfu_t
         freq_node_t<T> *new_freq = new freq_node_t<T>(cur_freq);
         if (next_freq.freq != cur_freq)
         {
-            clist_.insert(std::next(it, 1), *new_freq);
+            clist_.insert(std::next(it), *new_freq);
+        }
+        else
+        {
+            delete new_freq;
+            new_freq = &next_freq;
         }
 
         local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, new_freq);
