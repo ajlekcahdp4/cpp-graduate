@@ -59,10 +59,10 @@ int operator==(freq_node_t<T> first, const freq_node_t<T> second)
 //====================================lfu=========================================
 template <typename T, typename KeyT = int> struct lfu_t
 {
-    using freq_list_it_t = typename std::list<freq_node_t<T>>::iterator;
+    using freq_list_it_t = typename std::list<freq_node_t<T> *>::iterator;
     
     private:
-    std::list<freq_node_t<T>> clist_;
+    std::list<freq_node_t<T>*> clist_;
 
     using local_list_it_t = typename std::list<struct local_node_t<T>>::iterator;
     std::unordered_map <KeyT, local_list_it_t> table_;
@@ -86,7 +86,7 @@ template <typename T, typename KeyT = int> struct lfu_t
         {
             if (full())
             {
-                freq_node_t<T>& last_freq = clist_.front();
+                freq_node_t<T>& last_freq = *clist_.front();
                 local_node_t<T>& to_erase = last_freq.local_list.back();
                 table_.erase(table_.find(to_erase.key));
                 if (last_freq.local_list.size() == 0)
@@ -96,14 +96,14 @@ template <typename T, typename KeyT = int> struct lfu_t
             }
 
             freq_node_t<T> *first_freq = new freq_node_t<T>;
-            if (clist_.size() == 0 || (clist_.front()).freq != 1)
+            if (clist_.size() == 0 || (*clist_.front()).freq != 1)
             {
-                clist_.push_front(*first_freq);
+                clist_.push_front(first_freq);
             }
             else
             {
                 delete first_freq;
-                first_freq = &(clist_.front());
+                first_freq = clist_.front();
             }
             
             local_node_t<T> *new_local_node = new local_node_t<T> (1, key, first_freq);
@@ -119,21 +119,20 @@ template <typename T, typename KeyT = int> struct lfu_t
         size_t cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
         {
-            clist_.remove(parent_node);
+            clist_.remove(&parent_node);
         }
 
-        freq_list_it_t it = std::find (clist_.begin(), std::prev(clist_.end()), parent_node);
-        freq_node_t<T>& next_freq = *(std::next(it)); // what if there are no next freq node?
-
+        freq_list_it_t it = std::find (clist_.begin(), std::prev(clist_.end()), &parent_node);
         freq_node_t<T> *new_freq = new freq_node_t<T>(cur_freq);
-        if (next_freq.freq != cur_freq)
+
+        if (std::next(it) == clist_.end())
         {
-            clist_.insert(std::next(it), *new_freq);
+            clist_.insert(std::next(it), new_freq);
         }
         else
         {
             delete new_freq;
-            new_freq = &next_freq;
+            new_freq = *(std::next(it));
         }
 
         local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, new_freq);
