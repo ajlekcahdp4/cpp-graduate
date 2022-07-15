@@ -1,0 +1,4 @@
+/home/alex/cpp/cpp-graduate/01-basics/lfucpp/build/CMakeFiles/lfucpp.dir
+/home/alex/cpp/cpp-graduate/01-basics/lfucpp/build/CMakeFiles/test.dir
+/home/alex/cpp/cpp-graduate/01-basics/lfucpp/build/CMakeFiles/edit_cache.dir
+/home/alex/cpp/cpp-graduate/01-basics/lfucpp/build/CMakeFiles/rebuild_cache.dir

@@ -67,14 +67,17 @@ template <typename T, typename KeyT = int> struct lfu_t
     using local_list_it_t = typename std::list<struct local_node_t<T>>::iterator;
     std::unordered_map <KeyT, local_list_it_t> table_;
     
-    public:
-    size_t sz_;
+    private:
+    size_t capacity_;
+    size_t size_;
 
-    lfu_t (size_t sz) : sz_(sz) {}
+    public:
+
+    lfu_t (size_t cap) : capacity_(cap) {}
 
     bool full ()
     {
-        return (clist_.size() == sz_);
+        return size_ == capacity_;
     }
 
 
@@ -87,12 +90,15 @@ template <typename T, typename KeyT = int> struct lfu_t
             if (full())
             {
                 freq_node_t<T>& last_freq = *clist_.front();
+                local_list_t<T>& last_local_list = last_freq.local_list;
                 local_node_t<T>& to_erase = last_freq.local_list.back();
                 table_.erase(table_.find(to_erase.key));
-                if (last_freq.local_list.size() == 0)
+                last_local_list.pop_back();
+                if (last_local_list.size() == 0)
                 {
-                    clist_.erase(std::prev(clist_.end()));
+                    clist_.erase(clist_.begin());
                 }
+                size_--;
             }
 
             freq_node_t<T> *first_freq = new freq_node_t<T>;
@@ -110,12 +116,13 @@ template <typename T, typename KeyT = int> struct lfu_t
             new_local_node->data = slow_get_page(key);
             new_local_node->freq_node->local_list.push_front(*new_local_node);
             table_[key] = first_freq->local_list.begin();
+            size_++;
             return false;
         }
         auto found = hit->second;
 
         freq_node_t<T>& parent_node = *(*found).freq_node;
-        parent_node.local_list.remove(*found);
+        parent_node.local_list.remove(*found); // may be using splice method is a better solution
         size_t cur_freq = parent_node.freq + 1;
         if (parent_node.local_list.size() == 0)
         {

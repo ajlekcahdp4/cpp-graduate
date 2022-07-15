@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/alex/cpp/cpp-graduate/01-basics/lfucpp/build",
+  "command": "/usr/bin/clang++   -g -g --verbose -o CMakeFiles/lfucpp.dir/lfu-cache.cc.o -c /home/alex/cpp/cpp-graduate/01-basics/lfucpp/lfu-cache.cc",
+  "file": "/home/alex/cpp/cpp-graduate/01-basics/lfucpp/lfu-cache.cc"
+}
+]
