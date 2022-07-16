@@ -5,7 +5,7 @@ import random, sys, os, getopt
 usage_string = "gentest.py -n <num> -o output"
 
 MAX_REQUEST_VALUE = 10
-MAX_CACHE_SIZE = 10
+MAX_CACHE_SIZE = 3
 MAX_REQUESTS_NUMBER = 20
 
 def GenerateRandomTest(test_number):
