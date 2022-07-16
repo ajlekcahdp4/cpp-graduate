@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-add_compile_options(-g --verbose)
+add_compile_options(-g)
 
 project(lfucpp)
 
@@ -14,6 +14,7 @@ add_executable(lfucpp ${LFUCPP_RESOURCES})
 
 
 find_package(GTest)
+include(GoogleTest)
 enable_testing()
 
 find_program(BASH_PROGRAM bash)
