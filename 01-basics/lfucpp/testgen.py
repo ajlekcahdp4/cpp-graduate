@@ -4,9 +4,9 @@ import random, sys, os, getopt
 
 usage_string = "gentest.py -n <num> -o output"
 
-MAX_REQUEST_VALUE = 10
-MAX_CACHE_SIZE = 3
-MAX_REQUESTS_NUMBER = 20
+MAX_REQUEST_VALUE = 200
+MAX_CACHE_SIZE = 100
+MAX_REQUESTS_NUMBER = 10000
 
 def GenerateRandomTest(test_number):
     cache_size = random.randint(1, MAX_CACHE_SIZE)
