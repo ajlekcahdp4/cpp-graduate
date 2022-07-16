@@ -119,20 +119,17 @@ template <typename T, typename KeyT = int> struct lfu_t
             size_++;
             return false;
         }
+
         auto found = hit->second;
 
         freq_node_t<T>& parent_node = *(*found).freq_node;
-        parent_node.local_list.remove(*found); // may be using splice method is a better solution
         size_t cur_freq = parent_node.freq + 1;
-        if (parent_node.local_list.size() == 0)
-        {
-            clist_.remove(&parent_node);
-        }
 
         freq_list_it_t it = std::find (clist_.begin(), std::prev(clist_.end()), &parent_node);
+        freq_list_it_t next_freq_it = std::next(it);
         freq_node_t<T> *new_freq = new freq_node_t<T>(cur_freq);
 
-        if (std::next(it) == clist_.end())
+        if (next_freq_it == clist_.end() || (*next_freq_it)->freq != cur_freq)
         {
             clist_.insert(std::next(it), new_freq);
         }
@@ -142,9 +139,23 @@ template <typename T, typename KeyT = int> struct lfu_t
             new_freq = *(std::next(it));
         }
 
+
+        #if 0
+        parent_node.local_list.remove(*found); // may be using splice method is a better solution
         local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, new_freq);
         new_local_node->data = slow_get_page(key);
         new_freq->local_list.push_front(*new_local_node);
+        #endif
+
+        local_list_t<T> &parent_local_list = parent_node.local_list;
+        parent_local_list.splice(new_freq->local_list.begin(), parent_local_list, found, std::next(found));
+        (*found).freq++;
+
+        if (parent_node.local_list.empty())
+        {
+            clist_.remove(&parent_node);
+        }
+
         return true;
     }
 };
