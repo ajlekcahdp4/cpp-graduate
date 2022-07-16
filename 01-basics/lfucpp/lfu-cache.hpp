@@ -150,6 +150,7 @@ template <typename T, typename KeyT = int> struct lfu_t
         local_list_t<T> &parent_local_list = parent_node.local_list;
         parent_local_list.splice(new_freq->local_list.begin(), parent_local_list, found, std::next(found));
         (*found).freq++;
+        (*found).freq_node = new_freq;
 
         if (parent_node.local_list.empty())
         {
