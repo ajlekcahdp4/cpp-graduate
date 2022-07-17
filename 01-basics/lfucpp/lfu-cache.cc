@@ -26,7 +26,7 @@ int main ()
         std::cin >> q;
         assert (std::cin.good());
 
-        if (c.lfu_get(q, slow_get_page_imitation))
+        if (c.lookup_update(q, slow_get_page_imitation))
             hits++;
     }
 
