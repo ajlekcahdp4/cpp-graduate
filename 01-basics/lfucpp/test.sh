@@ -6,6 +6,8 @@ reset=`tput sgr0`
 
 current_folder=${2:-./}
 passed=true
+(( failed = 0 ))
+test_num=$(ls ${base_folder}/test*.dat | wc -l)
 
 for file in ${current_folder}/${base_folder}/test*.dat; do
     
@@ -24,8 +26,11 @@ for file in ${current_folder}/${base_folder}/test*.dat; do
     else
         echo "${red}Failed${reset}"
         passed=false
+        (( failed += 1 ))
     fi
 done
+
+echo "${failed} tests failed out of ${test_num}"
 
 if ${passed}; then
     exit 0
