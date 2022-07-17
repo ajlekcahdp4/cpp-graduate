@@ -139,14 +139,6 @@ template <typename T, typename KeyT = int> struct lfu_t
             new_freq = *(std::next(it));
         }
 
-
-        #if 0
-        parent_node.local_list.remove(*found); // may be using splice method is a better solution
-        local_node_t<T> *new_local_node = new local_node_t<T>(cur_freq, key, new_freq);
-        new_local_node->data = slow_get_page(key);
-        new_freq->local_list.push_front(*new_local_node);
-        #endif
-
         local_list_t<T> &parent_local_list = parent_node.local_list;
         parent_local_list.splice(new_freq->local_list.begin(), parent_local_list, found, std::next(found));
         (*found).freq++;
