@@ -74,10 +74,10 @@ template <typename T, typename KeyT = int> struct lfu_t
   public:
     lfu_t (size_t cap) : capacity_ (cap) {}
 
-    bool full () { return size_ == capacity_; }
+    bool full () const { return size_ == capacity_; }
 
-    size_t capacity () { return capacity_; }
-    size_t size () { return size_; }
+    size_t capacity () const { return capacity_; }
+    size_t size () const { return size_; }
 
     template <typename F> bool lookup_update (KeyT key, F slow_get_page)
     {
