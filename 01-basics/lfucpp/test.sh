@@ -11,7 +11,7 @@ test_num=$(ls ${base_folder}/test*.dat | wc -l)
 
 for file in ${current_folder}/${base_folder}/test*.dat; do
     
-    count=`echo $file | egrep -o [0-9]+`
+    count=`echo ${file: -8} | egrep -o [0-9]+`
     
     echo -n "Testing ${green}${file}${reset} ..."
 
@@ -20,7 +20,7 @@ for file in ${current_folder}/${base_folder}/test*.dat; do
     else
         $1 < $file > ${current_folder}/${base_folder}/temp.dat
     fi
-
+    
     if diff ${current_folder}/${base_folder}/answ${count}.dat ${current_folder}/${base_folder}/temp.dat; then
         echo "${green}Passed${reset}"
     else
