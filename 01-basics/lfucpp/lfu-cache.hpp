@@ -54,7 +54,7 @@ template <typename T, typename KeyT = int> class lfu_t {
             return freq_;
         }
 
-        std::list<local_node_t> &local_list () { return local_list_; }   // copy??
+        std::list<local_node_t> &local_list () { return local_list_; }
         local_node_t &local_list_back () { return local_list_.back (); }
         local_node_t &local_list_front () { return local_list_.front (); }
 
